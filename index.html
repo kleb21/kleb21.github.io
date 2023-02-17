@@ -106,5 +106,88 @@
         </html>
         </p>
    </div>
+
+   <div>
+    welcome controller
+    <p>
+        <?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Welcome extends CI_Controller {
+	
+	public function __construct() 
+	{
+		parent::__construct();
+		$this->load->helper('form');
+		$this->load->model('User');
+	}
+
+	public function index()
+	{
+		$data['users'] = $this->User->selectAll(); 
+		$this->load->view('welcome_message', $data);
+	}
+
+	public function addUser(){
+		$user['name'] = $this->input->post('name');
+		$user['lastN'] = $this->input->post('lastN');
+		$user['birth'] = $this->input->post('birth');
+		$user['genre'] = $this->input->post('genre');
+		$this->User->addUser($user);
+
+		redirect("welcome");
+	}
+
+	public function delete($idUser){
+		$this->User->delete($idUser);
+		
+		redirect("welcome");
+
+	}
+
+	public function update($idUser) {
+		$user['name'] = $this->input->post('name');
+		$user['lastN'] = $this->input->post('lastN');
+		$user['birth'] = $this->input->post('birth');
+		$user['genre'] = $this->input->post('genre');
+		$this->User->update($user, $idUser);
+
+		redirect("welcome");
+	}
+}
+
+    </p>
+   </div>
+        model
+        <p>
+            <?php
+	class User extends CI_Model
+	{
+		public function addUser($persona){
+			$this->db->insert('users', $persona);
+		}	
+
+		public function selectAll(){
+			$this->db->select('*');
+			$this->db->from('users');
+			return $this->db->get()->result();
+		}
+
+		public function delete($idUser){
+			$this->db->where("id", $idUser);
+			$this->db->delete('users');
+		}
+
+		public function update($users, $idUser){
+			$this->db->where('id', $idUser);
+			$this->db->update('users',$users );
+		}
+	}
+?>
+
+        </p>
+   <div>
+
+   </div>
 </body>
 </html>
