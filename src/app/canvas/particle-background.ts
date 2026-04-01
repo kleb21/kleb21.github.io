@@ -9,6 +9,7 @@ import {
   PLATFORM_ID,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { ThemeService } from '../core/services/theme.service';
 
 interface Particle {
   x: number;
@@ -33,6 +34,7 @@ interface Particle {
 export class ParticleBackgroundComponent implements OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
+  private readonly themeService = inject(ThemeService);
 
   private ctx: CanvasRenderingContext2D | null = null;
   private particles: Particle[] = [];
@@ -101,6 +103,9 @@ export class ParticleBackgroundComponent implements OnDestroy {
     const canvas = this.canvasRef().nativeElement;
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    const isDark = this.themeService.isDark();
+    const colorRGB = isDark ? '100, 255, 218' : '15, 118, 110'; // Teal base for dark, darker slate/teal for light
+
     // Update & draw particles
     for (const p of this.particles) {
       // Mouse repulsion
@@ -128,7 +133,7 @@ export class ParticleBackgroundComponent implements OnDestroy {
       // Draw particle
       this.ctx.beginPath();
       this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      this.ctx.fillStyle = 'rgba(100, 255, 218, 0.4)';
+      this.ctx.fillStyle = `rgba(${colorRGB}, 0.5)`;
       this.ctx.fill();
     }
 
@@ -140,11 +145,11 @@ export class ParticleBackgroundComponent implements OnDestroy {
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist < this.CONNECTION_DISTANCE) {
-          const opacity = (1 - dist / this.CONNECTION_DISTANCE) * 0.15;
+          const opacity = (1 - dist / this.CONNECTION_DISTANCE) * 0.2;
           this.ctx.beginPath();
           this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
           this.ctx.lineTo(this.particles[j].x, this.particles[j].y);
-          this.ctx.strokeStyle = `rgba(100, 255, 218, ${opacity})`;
+          this.ctx.strokeStyle = `rgba(${colorRGB}, ${opacity})`;
           this.ctx.lineWidth = 0.5;
           this.ctx.stroke();
         }

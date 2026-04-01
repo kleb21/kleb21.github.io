@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ThemeService } from '../services/theme.service';
 import { ActiveSectionService } from '../services/active-section.service';
+import { TranslationService } from '../i18n/translation.service';
 import { NavbarComponent } from './navbar';
 import { FooterComponent } from './footer';
 
@@ -18,7 +19,11 @@ import { FooterComponent } from './footer';
             class="block flex-1"
             [activeSection]="activeSectionService.activeSection()"
             [isDark]="themeService.isDark()"
+            [themePreference]="themeService.preference()"
+            [locale]="translationService.locale()"
+            [t]="translationService.translations()"
             (themeToggle)="themeService.toggle()"
+            (localeToggle)="translationService.toggleLocale()"
             (navClick)="activeSectionService.setActive($event)"
           />
         </div>
@@ -41,4 +46,5 @@ import { FooterComponent } from './footer';
 export class ShellComponent {
   protected readonly themeService = inject(ThemeService);
   protected readonly activeSectionService = inject(ActiveSectionService);
+  protected readonly translationService = inject(TranslationService);
 }

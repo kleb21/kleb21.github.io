@@ -1,6 +1,8 @@
-import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SocialLinksComponent } from '../../shared/reusable-data/components/social-links';
+import { Translations } from '../i18n/translation.model';
+import { ThemePreference } from '../services/theme.service';
 
 @Component({
   selector: 'app-navbar',
@@ -19,22 +21,22 @@ import { SocialLinksComponent } from '../../shared/reusable-data/components/soci
           </h1>
         </a>
         <h2 class="text-lg lg:text-xl font-medium text-[var(--color-text-primary)] mt-1">
-          Software Engineer
+          {{ t().navbar.subtitle }}
         </h2>
         <p class="text-[var(--color-text-secondary)] mt-3 max-w-xs leading-relaxed text-sm">
-          I build accessible, pixel-perfect digital experiences for the web.
+          {{ t().navbar.description }}
         </p>
 
         <!-- Navigation Links (visible on lg+) -->
         <nav class="hidden lg:block mt-12" aria-label="Main navigation">
           <ul class="flex flex-col gap-4" role="list">
-            @for (item of navItems; track item.id) {
+            @for (item of navItems(); track item.id) {
               <li>
                 <a
                   [routerLink]="item.path"
                   [fragment]="item.fragment"
                   (click)="navClick.emit(item.id)"
-                  class="group flex items-center gap-3 py-1"
+                  class="group flex items-center gap-3 py-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
                 >
                   <span
                     class="h-px transition-all duration-300"
@@ -62,18 +64,41 @@ import { SocialLinksComponent } from '../../shared/reusable-data/components/soci
         <app-social-links />
       </div>
 
+      <!-- Language Toggle (Fixed Top Right) -->
+      <button
+        type="button"
+        (click)="localeToggle.emit()"
+        [attr.aria-label]="t().language.switchTo"
+        class="fixed top-4 right-28 lg:top-8 lg:right-24 z-50 p-2 rounded-lg
+               bg-[var(--color-nav-bg)] lg:bg-transparent backdrop-blur-sm lg:backdrop-blur-none
+               text-[var(--color-text-secondary)]
+               hover:text-[var(--color-accent)] hover:bg-[var(--color-accent-muted)]
+               transition-colors duration-300 font-mono text-sm font-bold"
+      >
+        {{ locale() === 'en' ? 'ES' : 'EN' }}
+      </button>
+
       <!-- Theme Toggle (Fixed Top Right) -->
       <button
         type="button"
         (click)="themeToggle.emit()"
-        [attr.aria-label]="isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+        [attr.aria-label]="themeAriaLabel()"
         class="fixed top-4 right-16 lg:top-8 lg:right-12 z-50 p-2 rounded-lg
                bg-[var(--color-nav-bg)] lg:bg-transparent backdrop-blur-sm lg:backdrop-blur-none
                text-[var(--color-text-secondary)]
                hover:text-[var(--color-accent)] hover:bg-[var(--color-accent-muted)]
                transition-colors duration-300"
       >
-        @if (isDark()) {
+        @if (themePreference() === 'system') {
+          <!-- Monitor icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        } @else if (isDark()) {
           <!-- Sun icon -->
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24"
                fill="none" stroke="currentColor" stroke-width="2"
@@ -137,7 +162,7 @@ import { SocialLinksComponent } from '../../shared/reusable-data/components/soci
         >
           <nav aria-label="Mobile navigation">
             <ul class="flex flex-col items-center gap-6" role="list">
-              @for (item of navItems; track item.id) {
+              @for (item of navItems(); track item.id) {
                 <li>
                   <a
                     [routerLink]="item.path"
@@ -161,15 +186,29 @@ import { SocialLinksComponent } from '../../shared/reusable-data/components/soci
 export class NavbarComponent {
   readonly activeSection = input<string>('hero');
   readonly isDark = input(true);
+  readonly themePreference = input<ThemePreference>('system');
+  readonly locale = input<'en' | 'es'>('en');
+  readonly t = input.required<Translations>();
   readonly themeToggle = output<void>();
+  readonly localeToggle = output<void>();
   readonly navClick = output<string>();
 
   readonly mobileMenuOpen = signal(false);
 
-  readonly navItems = [
-    { id: 'about', label: 'About', path: '/', fragment: 'about', index: '01' },
-    { id: 'experience', label: 'Experience', path: '/', fragment: 'experience', index: '02' },
-    // { id: 'projects', label: 'Projects', path: '/', fragment: 'projects', index: '03' },
-    { id: 'contact', label: 'Contact', path: '/', fragment: 'contact', index: '04' },
-  ];
+  readonly themeAriaLabel = computed(() => {
+    const pref = this.themePreference();
+    const t = this.t();
+    if (pref === 'system') return t.theme.switchToLight;
+    if (pref === 'light') return t.theme.switchToDark;
+    return t.theme.switchToSystem;
+  });
+
+  readonly navItems = computed(() => {
+    const t = this.t();
+    return [
+      { id: 'about', label: t.nav.about, path: '/', fragment: 'about', index: '01' },
+      { id: 'experience', label: t.nav.experience, path: '/', fragment: 'experience', index: '02' },
+      { id: 'contact', label: t.nav.contact, path: '/', fragment: 'contact', index: '04' },
+    ];
+  });
 }

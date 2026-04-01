@@ -1,18 +1,18 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import { Experience } from '../models/experience.model';
+import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { SectionComponent } from '../../../shared/reusable-data/components/section';
 import { ExperienceCardComponent } from './experience-card';
 import { ScrollAnimateDirective } from '../../../core/directives/scroll-animation.directive';
-import { experiences } from '../../../shared/reusable-data/hardcoded-data/experiencies';
+import { TranslationService } from '../../../core/i18n/translation.service';
+import { getExperiences } from '../../../shared/reusable-data/hardcoded-data/experiencies';
 
 @Component({
   selector: 'app-experience-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SectionComponent, ExperienceCardComponent, ScrollAnimateDirective],
   template: `
-    <app-section sectionId="experience" title="Experience">
+    <app-section sectionId="experience" [title]="t().experience.title">
       <div class="space-y-2">
-        @for (exp of experiences; track exp.company) {
+        @for (exp of experiences(); track exp.company) {
           <div appScrollAnimate>
             <app-experience-card [experience]="exp" />
           </div>
@@ -28,7 +28,7 @@ import { experiences } from '../../../shared/reusable-data/hardcoded-data/experi
                  text-[var(--color-text-primary)]
                  hover:text-[var(--color-accent)] transition-colors duration-300"
         >
-          View Full Resume
+          {{ t().experience.viewResume }}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="w-4 h-4 transition-transform duration-300
@@ -50,5 +50,7 @@ import { experiences } from '../../../shared/reusable-data/hardcoded-data/experi
   `,
 })
 export class ExperienceListComponent {
-  readonly experiences = experiences;
+  private readonly translationService = inject(TranslationService);
+  protected readonly t = this.translationService.translations;
+  readonly experiences = computed(() => getExperiences(this.translationService.locale()));
 }

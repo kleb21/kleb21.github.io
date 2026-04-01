@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { TranslationService } from '../i18n/translation.service';
 
 @Component({
   selector: 'app-footer',
@@ -6,9 +7,9 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
   template: `
     <footer class="pb-6 lg:pb-8 text-center w-full flex justify-center pt-8 mt-8 lg:mt-0">
       <p class="text-sm text-[var(--color-text-secondary)] leading-relaxed max-w-md text-center">
-        Loosely designed and coded by
+        {{ t().footer.designedBy }}
         <span class="text-[var(--color-text-primary)] font-medium">Caleb</span>.
-        Built with
+        {{ t().footer.builtWith }}
         <a
           href="https://angular.dev"
           target="_blank"
@@ -18,7 +19,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
         >
           Angular
         </a>
-        and
+        {{ t().footer.and }}
         <a
           href="https://tailwindcss.com"
           target="_blank"
@@ -32,4 +33,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
     </footer>
   `,
 })
-export class FooterComponent {}
+export class FooterComponent {
+  private readonly translationService = inject(TranslationService);
+  protected readonly t = this.translationService.translations;
+}
