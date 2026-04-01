@@ -33,12 +33,6 @@ export class HomePageComponent implements OnDestroy {
   constructor() {
     afterNextRender(() => {
       if (!isPlatformBrowser(this.platformId)) return;
-      
-      // Force scroll to top on initial load, slightly delayed to override router's default navigation behavior
-      setTimeout(() => {
-        window.history.replaceState(null, document.title, window.location.pathname);
-        window.scrollTo(0, 0);
-      }, 50);
 
       this.setupScrollSpy();
       window.addEventListener('scroll', this.scrollListener, { passive: true });
