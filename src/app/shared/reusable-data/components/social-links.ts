@@ -61,8 +61,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 })
 export class SocialLinksComponent {
   readonly links = [
-    { label: 'GitHub', url: 'https://github.com', icon: 'github' },
-    { label: 'LinkedIn', url: 'https://linkedin.com', icon: 'linkedin' },
-    { label: 'Twitter', url: 'https://twitter.com', icon: 'twitter' },
+    { label: 'GitHub', url: 'https://github.com/kleb21', icon: 'github' },
+    { label: 'LinkedIn', url: 'https://www.linkedin.com/in/caleb-machado-a88a5b286/', icon: 'linkedin' },
   ];
 }
