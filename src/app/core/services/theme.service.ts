@@ -1,11 +1,11 @@
-import { Injectable, signal, computed, effect, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable, signal, computed, effect, PLATFORM_ID, inject, OnDestroy } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 export type Theme = 'dark' | 'light';
 export type ThemePreference = 'system' | 'dark' | 'light';
 
 @Injectable({ providedIn: 'root' })
-export class ThemeService {
+export class ThemeService implements OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
@@ -20,10 +20,13 @@ export class ThemeService {
 
   readonly isDark = computed(() => this.theme() === 'dark');
 
+  private mql: MediaQueryList | null = null;
+  private readonly onSystemThemeChange = (e: MediaQueryListEvent) => this.systemDark.set(e.matches);
+
   constructor() {
     if (this.isBrowser) {
-      const mql = window.matchMedia('(prefers-color-scheme: dark)');
-      mql.addEventListener('change', (e) => this.systemDark.set(e.matches));
+      this.mql = window.matchMedia('(prefers-color-scheme: dark)');
+      this.mql.addEventListener('change', this.onSystemThemeChange);
     }
 
     effect(() => {
@@ -34,6 +37,10 @@ export class ThemeService {
         localStorage.setItem('theme-preference', pref);
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.mql?.removeEventListener('change', this.onSystemThemeChange);
   }
 
   toggle(): void {

@@ -13,6 +13,7 @@ export class CursorHighlightDirective implements OnDestroy {
   readonly intensity = input(0.08, { alias: 'appCursorHighlight', transform: (v: unknown) => (v === '' || v === undefined ? 0.08 : numberAttribute(v)) });
   private overlay: HTMLDivElement | null = null;
   private isBrowser = false;
+  private removeTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     afterNextRender(() => {
@@ -58,12 +59,15 @@ export class CursorHighlightDirective implements OnDestroy {
     if (this.overlay) {
       this.overlay.style.opacity = '0';
       const ref = this.overlay;
-      setTimeout(() => ref.remove(), 300);
+      this.removeTimeout = setTimeout(() => ref.remove(), 300);
       this.overlay = null;
     }
   }
 
   ngOnDestroy(): void {
+    if (this.removeTimeout) {
+      clearTimeout(this.removeTimeout);
+    }
     this.overlay?.remove();
   }
 }
